@@ -13,8 +13,10 @@ p_stop_id='70588' # Villani
 #a_stop_id='70506'
 #a_stop_id='79931'
 # a_stop_id='73497'
-a_stop_id= "70453" # Magna Grecia/Tuscolo
-a_stop_id= "70453" # Pinturicchio
+# a_stop_id= "70453" # Magna Grecia/Tuscolo
+# a_stop_id= "75944" # Pinturicchio
+a_stop_id= "75515" # Furio Camillo
+
 
 data='20191213'
 deptime='8:30:00'
@@ -132,9 +134,10 @@ for idx, val in enumerate(conn):
                         myList.append(row)
                     else:
                         footpaths = wl_df[wl_df['fromstop_id'] == val[stopid]]
+                        ### I am taking a footpath following the same path of the bus line
                         for index, rowf in footpaths.iterrows():
                             if rowf['tostop_id'] == val[tostopid]:
-                                if stop_dict.get(val[stopid]) + rowf['footime']< val[endtime]:
+                                if stop_dict.get(val[stopid]) + rowf['footime'] < val[endtime]:
                                     stop_dict[rowf['tostop_id']] = stop_dict.get(val[stopid]) + rowf['footime']
                                     #trip['footpath'] = rowf['tostop_id']
                                     footp[val[tostopid]]='footpath'
@@ -149,8 +152,10 @@ for idx, val in enumerate(conn):
                                     trip[val[tripid]] = val[tostopid]
                                     stop_dict[val[tostopid]] = val[endtime]
                                     myList.append(row)
-
+                            ## jump to another station reachable by foot but that was not on the same path of the bus line
                             elif stop_dict.get(rowf['tostop_id']) is not None:
+                            #   if stop_dict.get(val[stopid]) + rowf['footime'] < val[endtime]:
+                            #      stop_dict[rowf['tostop_id']] = stop_dict.get(val[stopid]) + rowf['footime']
                                if (val[starttime] + float(rowf['footime'])) < stop_dict.get(rowf['tostop_id']):
                                     stop_dict[rowf['tostop_id']] = val[starttime] + rowf['footime']
                                     trip['footpath'] = rowf['tostop_id']

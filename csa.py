@@ -18,7 +18,7 @@ p_stop_id='70588' # Villani
 a_stop_id= "75515" # Furio Camillo
 
 
-data='20191213'
+data='20191213'  # this is the timetable
 deptime='8:30:00'
 footpathspeed=1 #m/s
 ##########################################################################
@@ -39,6 +39,7 @@ path='C:/ENEA_CAS_WORK/GTFS_Roma/gtfs/'
 ############loading TIMETABLE  (connections) #############################################
 pos_inf = float('inf')     # positive infinity
 fields = ['route_id','trip_id','stop_id','start_time','tostop_id','end_time','stop_name', 'tostop_name','dist']
+# define a dictionary
 dtype_dic= {'route_id':str,'trip_id':str,'stop_id':str,'start_time':"float64",'tostop_id':str,'end_time':"float64", 'stop_name':str, 'tostop_name':str, 'dist':"float64"}
 #start = dt.datetime.now()
 connections = pd.read_csv(path+data+'.csv', usecols=fields, dtype = dtype_dic)
@@ -58,6 +59,7 @@ dist=connections.columns.get_loc("dist")
 connections1 = connections.loc[(connections['start_time']>=start_dt_sec)]
 connections1 = connections1.sort_values(['start_time'])
 connections1.sort_values(['start_time'], inplace=True)
+# make a list (timetable)
 conn = connections1.values.tolist()
 del(connections1)
 #####################################################################################
@@ -74,9 +76,9 @@ stop__name=stp["stop_name"].tolist()
 #list of  infinite
 a = [math.inf for x in range(len(stop))]
 
-#create dictionary for stops
+#create dictionary for stops (ID and names)
 stop_dict=dict(zip( stop, a))
-stp_name=dict(zip( stop, stop__name))
+stp_name=dict(zip(  stop, stop__name))
 #print(stop_dict.get('71109'))
 ########################################################################################
 
@@ -101,11 +103,11 @@ footp=dict()
 #{ keyName1 : value1, keyName2: value2, keyName3: [val1, val2, val3] }
 #trip['a'] = 'false'
 
+# setup starting time (datetime)
 stop_dict[p_stop_id]=start_dt_sec
 #print(stop_dict.get(p_stop_id))
 
 myList = []
-
 
 
 for idx, val in enumerate(conn):
@@ -139,7 +141,7 @@ for idx, val in enumerate(conn):
                             if rowf['tostop_id'] == val[tostopid]:
                                 if stop_dict.get(val[stopid]) + rowf['footime'] < val[endtime]:
                                     stop_dict[rowf['tostop_id']] = stop_dict.get(val[stopid]) + rowf['footime']
-                                    #trip['footpath'] = rowf['tostop_id']
+                                    trip['footpath'] = rowf['tostop_id']
                                     footp[val[tostopid]]='footpath'
                                     row1 = ['fp', 'footpath', val[stopid], val[stopname], val[tostopid], val[tostopname],
                                             datetime.fromtimestamp(val[starttime]).strftime("%H:%M:%S"),
@@ -154,8 +156,7 @@ for idx, val in enumerate(conn):
                                     myList.append(row)
                             ## jump to another station reachable by foot but that was not on the same path of the bus line
                             elif stop_dict.get(rowf['tostop_id']) is not None:
-                            #   if stop_dict.get(val[stopid]) + rowf['footime'] < val[endtime]:
-                            #      stop_dict[rowf['tostop_id']] = stop_dict.get(val[stopid]) + rowf['footime']
+                               #  if stop_dict.get(val[stopid]) + rowf['footime'] < val[endtime]:
                                if (val[starttime] + float(rowf['footime'])) < stop_dict.get(rowf['tostop_id']):
                                     stop_dict[rowf['tostop_id']] = val[starttime] + rowf['footime']
                                     trip['footpath'] = rowf['tostop_id']
